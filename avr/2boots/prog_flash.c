@@ -32,13 +32,9 @@
 /* page buffer ---------------------------------------------------- */
 uint8_t pagebuffer[SPM_PAGESIZE];
 
-
-/* address buffer */
-uint16_t address;
-
 /* access to flash memory------------------------------------------ */
 
-void write_flash_page()
+void write_flash_page(uint16_t address)
 {
 	uint16_t i = 0;
 

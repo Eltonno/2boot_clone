@@ -1,7 +1,7 @@
 /**********************************************************/
 /* board-arduino.c                                        */
 /* Copyright (c) 2010 by thomas seiler                    */
-/* This file is based on the original Arduino Bootloader  */
+/* 2boots board file for arduino boards                   */
 /* -------------------------------------------------------*/
 /*                                                        */
 /* This program is free software; you can redistribute it */
@@ -25,10 +25,14 @@
 /* http://www.fsf.org/licenses/gpl.txt                    */
 /**********************************************************/
 
-/* which version to use ? 
+/* which version to use ?
  *
- * for the Arduino Ethernet Shield, use version -PD4-board-arduino
- * for the Sparkfun SD Card Shield, use version -...
+ * use ...-PD4.hex for:
+ *  - Arduino with Ethernet Shield
+ *  - Arduino ETH
+ *
+ * use ...-??? for:
+ *  - Sparkfun SD shield
  */
 
 

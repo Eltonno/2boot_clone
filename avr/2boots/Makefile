@@ -1,5 +1,5 @@
 # 2boots Makefile
-# (c) 2011 thomas seiler      (thseiler@gmail.com)
+# (c) 2011,2012 thomas seiler      (thseiler@gmail.com)
 #
 
 # 'all' is the default target: 
@@ -13,11 +13,16 @@
 CC       = avr-gcc
 OBJCOPY  = avr-objcopy
 OBJDUMP  = avr-objdump
-OPTIMIZE = -Os -funsigned-char -fno-split-wide-types -fno-inline-small-functions -mcall-prologues -ffunction-sections -fdata-sections -ffreestanding -combine -fwhole-program -fno-jump-tables
-AVRSIZE  = avr-size
+OPTIMIZE = -Os -funsigned-char -fno-split-wide-types -fno-inline-small-functions -mcall-prologues -ffunction-sections -fdata-sections -ffreestanding -combine -fwhole-program -fno-jump-tables -fno-tree-scev-cprop -fno-split-wide-types
 
+AVRSIZE  = avr-size
 override CFLAGS  = -g -Wall $(OPTIMIZE) -mmcu=$(MCU) -DF_CPU=$(FCPU) $(DEFS)
 override LDFLAGS = -Wl,$(LDSECTION) -Wl,--relax -nostartfiles -Wl,-gc-sections
+
+# setup avrdude isp tool
+ISPTOOL = avrispmkII
+ISPPORT = usb
+ISPSPEED = -b 115200
 
 # these are our actual source files
 # the BOARD variable will be replaced later, depending on which board is beeing compiled
@@ -70,6 +75,7 @@ board-ftthcont: MMC_CSS = PB2
 
 
 
+
 # set certain variables per MCU
 
 #atmega168:
@@ -84,7 +90,7 @@ board-ftthcont: MMC_CSS = PB2
 
 # This rule finally builds 2boots.
 # The idea here is to learn the configuration from the make target name
-# This is done with the help of good old shell
+# This is done with the help of good old shell tools cut and awk
 2boots-%: MCU =  $(shell echo $@ | cut -d - -f 2 )
 2boots-%: FCPU = $(shell echo $@ | cut -d - -f 3 )
 2boots-%: MMC_CS = $(shell echo $@ | cut -d - -f 4)
@@ -134,8 +140,17 @@ size-report:
 	@echo 
 	@$(AVRSIZE) build/*.hex
 
-# This section finally creates targets for all combinations of boards, mcus, mmc-cs and frequencies:
-# because of evil make magic (secondary expansion) it should be the last rule
+
+
+ISPFUSES = avrdude -c $(ISPTOOL) -p $(MCU_TARGET) -P $(ISPPORT) $(ISPSPEED) \
+-e -u -U lock:w:0x3f:m -U efuse:w:0x$(EFUSE):m -U hfuse:w:0x$(HFUSE):m -U lfuse:w:0x$(LFUSE):m
+ISPFLASH = avrdude -c $(ISPTOOL) -p $(MCU_TARGET) -P $(ISPPORT) $(ISPSPEED) \
+-U flash:w:$(PROGRAM)_$(TARGET).hex -U lock:w:0x0f:m
+
+
+# This section finally creates targets for all combinations of boards, mcus,
+# mmc-cs and frequencies. Because of its evil make magic (secondary expansion)
+# it is best to keep this the last rule in the file:
 board-%: TARGETS = $(foreach currentmcu, $(MCUS) , $(foreach currentfreq, $(FCPUS), $(foreach currentmmccs, $(MMC_CSS), 2boots-$(currentmcu)-$(currentfreq)-$(currentmmccs)-$@.hex ) ) )
 .SECONDEXPANSION:
 board-%:  $$(TARGETS) ;

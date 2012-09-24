@@ -33,8 +33,6 @@
 #include <inttypes.h>
 
 extern uint8_t pagebuffer[SPM_PAGESIZE];
-void write_flash_page();
-
-extern uint16_t address;
+void write_flash_page(uint16_t address);
 
 #endif
